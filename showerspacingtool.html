@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shower Sizing Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .control-group h3 {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            background: #0099ff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.2s;
+            min-width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: #0077cc;
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-minus {
+            background: #ff5252;
+        }
+
+        .btn-minus:hover {
+            background: #ff1744;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        input[type="number"] {
+            width: 85px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #0099ff;
+        }
+
+        .unit {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .display-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #0099ff;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 25px 0;
+            padding: 30px 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            min-height: 300px;
+        }
+
+        .grid-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .shower-grid {
+            background: #fff;
+            border: 4px solid #0099ff;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,153,255,0.25);
+        }
+
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .grid-line-h, .grid-line-v {
+            position: absolute;
+            background: #e0e0e0;
+        }
+
+        .grid-line-h {
+            width: 100%;
+            height: 1px;
+        }
+
+        .grid-line-v {
+            height: 100%;
+            width: 1px;
+        }
+
+        .dimension-label {
+            position: absolute;
+            font-size: 13px;
+            font-weight: bold;
+            color: #0099ff;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 2px solid #0099ff;
+        }
+
+        .label-width {
+            bottom: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .label-height {
+            right: -90px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+
+        .btn-done {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 25px auto;
+            padding: 16px;
+            font-size: 18px;
+            background: #4CAF50;
+            box-shadow: 0 4px 10px rgba(76,175,80,0.3);
+        }
+
+        .btn-done:hover {
+            background: #45a049;
+        }
+
+        .result {
+            display: none;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h3 {
+            color: #2e7d32;
+            margin-bottom: 18px;
+            font-size: 22px;
+        }
+
+        .result-values {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .result-item {
+            background: white;
+            padding: 18px 25px;
+            border-radius: 8px;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .result-item strong {
+            color: #2e7d32;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-item span {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+
+        .copy-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+        }
+
+        .copy-section p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .copy-values {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .copy-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #1976D2;
+        }
+
+        .copy-btn.copied {
+            background: #4CAF50;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+
+            .label-height {
+                right: -70px;
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            .label-width {
+                bottom: -32px;
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            h2 {
+                font-size: 19px;
+            }
+
+            .grid-container {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📏 Shower Space Sizing Tool</h2>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>Width Controls</h3>
+                <div class="control-row">
+                    <button class="btn btn-minus" onclick="adjustWidth(-10)" aria-label="Decrease width">−</button>
+                    <div class="display-value" id="widthDisplay">100 cm</div>
+                    <button class="btn" onclick="adjustWidth(10)" aria-label="Increase width">+</button>
+                </div>
+                <div class="control-row">
+                    <div class="input-group">
+                        <input type="number" id="widthInput" value="100" min="50" max="500" step="1" 
+                               onchange="setWidth()" oninput="setWidth()" aria-label="Width in centimeters">
+                        <span class="unit">cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Height Controls</h3>
+                <div class="control-row">
+                    <button class="btn btn-minus" onclick="adjustHeight(-10)" aria-label="Decrease height">−</button>
+                    <div class="display-value" id="heightDisplay">200 cm</div>
+                    <button class="btn" onclick="adjustHeight(10)" aria-label="Increase height">+</button>
+                </div>
+                <div class="control-row">
+                    <div class="input-group">
+                        <input type="number" id="heightInput" value="200" min="50" max="500" step="1" 
+                               onchange="setHeight()" oninput="setHeight()" aria-label="Height in centimeters">
+                        <span class="unit">cm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid-wrapper">
+                <div class="shower-grid" id="showerGrid">
+                    <div class="grid-lines" id="gridLines"></div>
+                </div>
+                <div class="dimension-label label-width" id="labelWidth">100 cm</div>
+                <div class="dimension-label label-height" id="labelHeight">200 cm</div>
+            </div>
+        </div>
+
+        <p class="info-text">Each grid square represents 10cm × 10cm</p>
+
+        <button class="btn btn-done" onclick="finalizeDimensions()">✓ Done - Save Dimensions</button>
+
+        <div class="result" id="result">
+            <h3>✓ Dimensions Saved Successfully!</h3>
+            <div class="result-values">
+                <div class="result-item">
+                    <strong>Width</strong>
+                    <span id="finalWidth">100 cm</span>
+                </div>
+                <div class="result-item">
+                    <strong>Height</strong>
+                    <span id="finalHeight">200 cm</span>
+                </div>
+                <div class="result-item">
+                    <strong>Area</strong>
+                    <span id="finalArea">2.0 m²</span>
+                </div>
+            </div>
+            
+            <div class="copy-section">
+                <p><strong>Quick Copy:</strong></p>
+                <div class="copy-values">
+                    <button class="copy-btn" onclick="copyToClipboard('width')">Copy Width</button>
+                    <button class="copy-btn" onclick="copyToClipboard('height')">Copy Height</button>
+                    <button class="copy-btn" onclick="copyToClipboard('area')">Copy Area</button>
+                    <button class="copy-btn" onclick="copyToClipboard('all')">Copy All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial dimensions in cm
+        let width = 100;
+        let height = 200;
+        
+        // Scale factor for display
+        const scale = 2;
+        const maxDisplayWidth = 250;
+        const maxDisplayHeight = 250;
+
+        function updateDisplay() {
+            document.getElementById('widthInput').value = width;
+            document.getElementById('heightInput').value = height;
+            
+            document.getElementById('widthDisplay').textContent = width + ' cm';
+            document.getElementById('heightDisplay').textContent = height + ' cm';
+            
+            document.getElementById('labelWidth').textContent = width + ' cm';
+            document.getElementById('labelHeight').textContent = height + ' cm';
+            
+            let displayWidth = Math.min(width / scale, maxDisplayWidth);
+            let displayHeight = Math.min(height / scale, maxDisplayHeight);
+            
+            displayWidth = Math.max(displayWidth, 50);
+            displayHeight = Math.max(displayHeight, 100);
+            
+            const grid = document.getElementById('showerGrid');
+            grid.style.width = displayWidth + 'px';
+            grid.style.height = displayHeight + 'px';
+            
+            drawGridLines(displayWidth, displayHeight);
+            notifyParent();
+            resizeIframe();
+        }
+
+        function drawGridLines(displayWidth, displayHeight) {
+            const gridLines = document.getElementById('gridLines');
+            gridLines.innerHTML = '';
+            
+            const gridSize = 10 / scale;
+            
+            for (let y = gridSize; y < displayHeight; y += gridSize) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-h';
+                line.style.top = y + 'px';
+                gridLines.appendChild(line);
+            }
+            
+            for (let x = gridSize; x < displayWidth; x += gridSize) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-v';
+                line.style.left = x + 'px';
+                gridLines.appendChild(line);
+            }
+        }
+
+        function adjustWidth(amount) {
+            width = Math.max(50, Math.min(500, width + amount));
+            updateDisplay();
+        }
+
+        function adjustHeight(amount) {
+            height = Math.max(50, Math.min(500, height + amount));
+            updateDisplay();
+        }
+
+        function setWidth() {
+            const input = document.getElementById('widthInput');
+            width = Math.max(50, Math.min(500, parseInt(input.value) || 100));
+            updateDisplay();
+        }
+
+        function setHeight() {
+            const input = document.getElementById('heightInput');
+            height = Math.max(50, Math.min(500, parseInt(input.value) || 200));
+            updateDisplay();
+        }
+
+        function finalizeDimensions() {
+            const area = (width * height) / 10000;
+            
+            document.getElementById('finalWidth').textContent = width + ' cm';
+            document.getElementById('finalHeight').textContent = height + ' cm';
+            document.getElementById('finalArea').textContent = area.toFixed(2) + ' m²';
+            
+            document.getElementById('result').classList.add('show');
+            
+            notifyParent(true);
+            
+            setTimeout(() => {
+                resizeIframe();
+                document.getElementById('result').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+            }, 100);
+        }
+
+        function notifyParent(finalized = false) {
+            const area = (width * height) / 10000;
+            const data = {
+                type: 'showerDimensions',
+                width: width,
+                height: height,
+                area: area.toFixed(2),
+                widthText: width + ' cm',
+                heightText: height + ' cm',
+                areaText: area.toFixed(2) + ' m²',
+                finalized: finalized
+            };
+            
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(data, '*');
+                }
+            } catch (e) {
+                console.log('Parent communication not available');
+            }
+        }
+
+        function resizeIframe() {
+            const height = document.body.scrollHeight;
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'resizeIframe',
+                        height: height
+                    }, '*');
+                }
+            } catch (e) {
+                console.log('Resize communication not available');
+            }
+        }
+
+        function copyToClipboard(type) {
+            const area = (width * height) / 10000;
+            let textToCopy = '';
+            
+            switch(type) {
+                case 'width':
+                    textToCopy = width + ' cm';
+                    break;
+                case 'height':
+                    textToCopy = height + ' cm';
+                    break;
+                case 'area':
+                    textToCopy = area.toFixed(2) + ' m²';
+                    break;
+                case 'all':
+                    textToCopy = `Width: ${width} cm\nHeight: ${height} cm\nArea: ${area.toFixed(2)} m²`;
+                    break;
+            }
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Copied: ' + textToCopy);
+            });
+        }
+
+        // Initialize
+        updateDisplay();
+        
+        // Resize iframe on load
+        window.addEventListener('load', resizeIframe);
+        
+        // Listen for requests from parent
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'getShowerDimensions') {
+                notifyParent();
+            }
+        });
+    </script>
+</body>
+</html>
